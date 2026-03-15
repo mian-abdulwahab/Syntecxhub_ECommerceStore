@@ -1,0 +1,9 @@
+{
+  "name": "mg-tech-mern",
+  "version": "1.0.0",
+  "scripts": {
+    "setup": "npm install && npm install --prefix frontend && npm install --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "start": "node backend/server.js"
+  }
+}

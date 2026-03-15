@@ -1,0 +1,329 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+:root {
+  --primary: #111827; /* Dark Slate */
+  --accent: #6366f1;  /* Indigo */
+  --bg: #f9fafb;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--primary);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #edf2f7;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.btn-primary:hover { background: var(--accent); }
+:root {
+  --primary: #0f172a;
+  --accent: #6366f1;
+  --bg: #f8fafc;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* FIX: This makes your Login/Signup inputs stack vertically */
+form input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box; /* Crucial for width */
+}
+
+/* FIX: Professional Button Style */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: 0.3s;
+}
+/* --- Navbar Container Fix --- */
+.main-nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px; /* Gives the navbar a consistent height */
+}
+
+/* --- The Right Side Group --- */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Professional spacing between Cart, Login, etc. */
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Spacing between Login and Sign Up */
+}
+
+/* --- Logo Styling --- */
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Sign Up Button Styling --- */
+.signup-btn {
+  background-color: var(--primary);
+  color: white !important; /* Forces white text */
+  padding: 8px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.signup-btn:hover {
+  background-color: var(--accent);
+}
+
+/* --- Cart & Login Text --- */
+.cart-link, .login-link {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+/* Ensure the body doesn't have an overflow that breaks sticky behavior */
+html, body {
+  overflow-x: hidden;
+}
+
+.main-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Ensures it stays above all other content */
+  background-color: #ffffff; /* Must have a solid background */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Adds depth when scrolling */
+  width: 100%;
+}
+/* --- YOUR ORIGINAL THEME --- */
+:root {
+  --primary: #111827; /* Dark Slate */
+  --accent: #6366f1;  /* Indigo */
+  --bg: #f9fafb;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--primary);
+  /* CRITICAL for Sticky: Remove any overflow-x hidden from body if it exists */
+  overflow-x: clip; 
+}
+
+/* --- THE STICKY NAVBAR FIX --- */
+.main-nav {
+  position: -webkit-sticky; 
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000; 
+  background-color: #ffffff; /* Solid white so you can't see text behind it */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #edf2f7;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- YOUR ORIGINAL PRODUCT CARD --- */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #edf2f7;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* --- FIX: FORM INPUTS (Vertical Stacking) --- */
+form input, form textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box; /* Ensures padding doesn't break layout */
+}
+
+/* --- YOUR ORIGINAL BUTTON STYLE (Updated for Form compatibility) --- */
+.btn-primary, button[type="submit"] {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex; /* Changed from inline-block for icon alignment */
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  border: none;
+  cursor: pointer;
+  width: 100%; /* Default for forms/cards */
+}
+
+.btn-primary:hover { 
+  background: var(--accent); 
+}
+
+/* --- NAVBAR LAYOUT FIX --- */
+.nav-links, .auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Specific button size for Navbar so it isn't huge */
+.signup-btn {
+  background-color: var(--primary);
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  width: auto !important;
+}
+/* --- Cart Badge Styling --- */
+.cart-link {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background-color: var(--accent); /* Your Indigo color */
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+  min-width: 14px;
+  text-align: center;
+  border: 2px solid white; /* Makes it stand out against the white navbar */
+}
+/* --- Professional Toast (Bottom-Right Small Notification) --- */
+.toast-container {
+  position: fixed;
+  bottom: 30px;    /* Distance from bottom */
+  right: 30px;     /* Distance from right */
+  width: auto;     /* FIX: Prevents it from being too wide */
+  min-width: 250px;
+  max-width: 350px;
+  height: auto;    /* FIX: Prevents it from being too tall */
+  background-color: #111827; /* Your Dark Slate */
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 10000;  /* Higher than navbar */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 5px solid var(--accent); /* Indigo strip */
+  animation: slideInFromRight 0.4s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
