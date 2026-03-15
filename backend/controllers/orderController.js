@@ -4,37 +4,51 @@ const Order = require('../models/Order');
 // @route   POST /api/orders
 // @access  Private
 const addOrderItems = async (req, res) => {
-    const { 
-        orderItems, 
-        shippingAddress, 
-        totalPrice,
-        paymentMethod // Now capturing paymentMethod from frontend
-    } = req.body;
+    try {
+        const { 
+            orderItems, 
+            shippingAddress, 
+            totalPrice,
+            paymentMethod 
+        } = req.body;
 
-    if (orderItems && orderItems.length === 0) {
-        res.status(400).json({ message: 'No order items' });
-        return;
-    } else {
+        if (orderItems && orderItems.length === 0) {
+            return res.status(400).json({ message: 'No order items' });
+        }
+
         const order = new Order({
             user: req.user._id,
             orderItems: orderItems.map((x) => ({
-                ...x,
-                product: x.product,
-                _id: undefined
+                name: x.name,
+                qty: x.qty,
+                image: x.image,
+                price: x.price,
+                product: x.product || x._id, // Ensure we have the product ID
             })),
-            shippingAddress,
+            shippingAddress: {
+                address: shippingAddress.address,
+                city: shippingAddress.city,
+                postalCode: shippingAddress.postalCode, // CRITICAL: This was missing
+                country: shippingAddress.country,
+            },
             paymentMethod,
             totalPrice,
-            // LOGIC: PayPal is paid immediately. Cash is paid on delivery.
+            // These satisfy the "required" fields in your Schema
+            itemsPrice: totalPrice, 
+            shippingPrice: 0,
+            taxPrice: 0,
             isPaid: paymentMethod === 'PayPal' ? true : false,
             paidAt: paymentMethod === 'PayPal' ? Date.now() : null,
+            isDelivered: false, // Explicitly set to avoid validation issues
         });
 
         const createdOrder = await order.save();
         res.status(201).json(createdOrder);
+    } catch (error) {
+        console.error("ORDER SAVE ERROR:", error.message);
+        res.status(500).json({ message: "Database Save Failed: " + error.message });
     }
 };
-
 // @desc    Get order by ID
 // @route   GET /api/orders/:id
 // @access  Private
