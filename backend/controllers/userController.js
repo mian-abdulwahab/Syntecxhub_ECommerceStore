@@ -2,8 +2,11 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+// FIX: Added .toString() to ensure the ID is a simple string for verification
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    return jwt.sign({ id: id.toString() }, process.env.JWT_SECRET, { 
+        expiresIn: '30d' 
+    });
 };
 
 // @desc    Auth user & get token
@@ -18,7 +21,6 @@ const authUser = async (req, res) => {
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin,
-            // FIX: Send cartItems back so frontend can load them on login
             cartItems: user.cartItems || [], 
             token: generateToken(user._id),
         });
@@ -52,7 +54,6 @@ const registerUser = async (req, res) => {
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin,
-            // New users start with an empty cart
             cartItems: [], 
             token: generateToken(user._id),
         });
@@ -66,7 +67,6 @@ const registerUser = async (req, res) => {
 const updateUserCart = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
-
         if (user) {
             user.cartItems = req.body.cartItems;
             const updatedUser = await user.save();
@@ -80,7 +80,6 @@ const updateUserCart = async (req, res) => {
 };
 
 // @desc    Get user profile (Private)
-// @route   GET /api/users/profile
 const getUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (user) {
