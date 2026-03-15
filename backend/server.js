@@ -20,14 +20,15 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 
 // 2. PRODUCTION LOGIC
+// 2. PRODUCTION LOGIC
 if (process.env.NODE_ENV === 'production') {
     const __dirname = path.resolve();
     
     // Serve the static files from the React build folder
     app.use(express.static(path.join(__dirname, '/frontend/build')));
 
-    // FIXED: Changed '*' to '/*' to satisfy newer Express path requirements
-    app.get('/*', (req, res) =>
+    // FIX: Use (.*) to capture all routes for the React SPA
+    app.get(/(.*)/, (req, res) =>
         res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
     );
 } else {
