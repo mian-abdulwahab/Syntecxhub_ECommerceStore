@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const path = require('path'); // Required for handling file paths
+const path = require('path'); 
 const connectDB = require('./config/db');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -20,19 +20,17 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 
 // 2. PRODUCTION LOGIC
-// This tells Node to serve the React frontend build folder
 if (process.env.NODE_ENV === 'production') {
     const __dirname = path.resolve();
     
     // Serve the static files from the React build folder
     app.use(express.static(path.join(__dirname, '/frontend/build')));
 
-    // Any route that is NOT an API route (e.g., /cart, /profile) will serve index.html
-    app.get('*', (req, res) =>
+    // FIXED: Changed '*' to '/*' to satisfy newer Express path requirements
+    app.get('/*', (req, res) =>
         res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
     );
 } else {
-    // Development fallback
     app.get('/', (req, res) => {
         res.send('API is running...');
     });
