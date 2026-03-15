@@ -27,26 +27,38 @@ const PlaceOrderScreen = () => {
         },
       };
 
-      // Cleaned up URLs to use the proxy set in package.json
-      const { data } = await axios.post('/api/orders', {
-        orderItems: cartItems,
-        shippingAddress,
-        paymentMethod, // This now correctly passes "Cash" or "PayPal"
-        totalPrice,
-      }, config);
+      // 1. Prepare the exact data the Schema requires
+      const orderData = {
+        orderItems: cartItems.map(item => ({
+          ...item,
+          product: item.product || item._id // Ensure the ID is passed as 'product'
+        })),
+        shippingAddress: {
+          address: shippingAddress.address,
+          city: shippingAddress.city,
+          postalCode: shippingAddress.postalCode,
+          country: shippingAddress.country,
+        },
+        paymentMethod: paymentMethod,
+        itemsPrice: totalPrice,
+        shippingPrice: 0, // You have 'Free' in UI
+        taxPrice: 0,      // Adding 0 to satisfy potential schema requirements
+        totalPrice: totalPrice,
+      };
 
-      // Clear cart globally and in DB
+      // 2. Use the full Render URL to avoid proxy 500 errors
+      const { data } = await axios.post('https://mg-tech-ecommercestore.onrender.com/api/orders', orderData, config);
+
+      // Clear cart
       setCartItems([]);
-      await axios.put('/api/users/cart', { cartItems: [] }, config);
+      await axios.put('https://mg-tech-ecommercestore.onrender.com/api/users/cart', { cartItems: [] }, config);
       
-      // Navigate to the Success page
       navigate(`/order/${data._id}`);
     } catch (err) {
-      console.error("Order Error:", err);
-      // You could trigger a Toast here if you have it available
+      console.error("Order Error:", err.response ? err.response.data : err);
+      alert(err.response?.data?.message || "Failed to place order. Check console.");
     }
   };
-
   return (
     <div className="container" style={{ marginTop: '40px', paddingBottom: '100px' }}>
       <h1 style={{ marginBottom: '30px' }}>Final Review</h1>
