@@ -1,7 +1,7 @@
 const products = [
   {
     name: 'iPhone 15 Pro',
-    image: 'https://images.unsplash.com/photo-1696446701796-da61225697cc?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=1000&auto=format&fit=crop',
     description: 'Titanium design with A17 Pro chip.',
     category: 'Mobile',
     price: 999,

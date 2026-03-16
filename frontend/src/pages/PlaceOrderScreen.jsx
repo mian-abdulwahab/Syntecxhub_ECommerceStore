@@ -1,25 +1,31 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react'; // Added useState
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import axios from 'axios';
-import { MapPin, CreditCard, ShoppingBag, ArrowRight } from 'lucide-react';
+import { MapPin, CreditCard, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react'; // Added Loader2 for visual feedback
 
 const PlaceOrderScreen = () => {
   const { cartItems, setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
   
-  // 1. Fetching data stored in previous steps
+  // State to manage loading during the API call
+  const [isLoading, setIsLoading] = useState(false);
+  
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
   const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress')) || {};
   
-  // Ensure we parse the payment method correctly (removes extra quotes)
   const rawPaymentMethod = localStorage.getItem('paymentMethod');
   const paymentMethod = rawPaymentMethod ? JSON.parse(rawPaymentMethod) : 'Not Selected';
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
   const placeOrderHandler = async () => {
+    // Prevent multiple clicks if already loading
+    if (isLoading) return;
+
     try {
+      setIsLoading(true); // Start loading
+
       const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -27,11 +33,10 @@ const PlaceOrderScreen = () => {
         },
       };
 
-      // 1. Prepare the exact data the Schema requires
       const orderData = {
         orderItems: cartItems.map(item => ({
           ...item,
-          product: item.product || item._id // Ensure the ID is passed as 'product'
+          product: item.product || item._id 
         })),
         shippingAddress: {
           address: shippingAddress.address,
@@ -41,24 +46,27 @@ const PlaceOrderScreen = () => {
         },
         paymentMethod: paymentMethod,
         itemsPrice: totalPrice,
-        shippingPrice: 0, // You have 'Free' in UI
-        taxPrice: 0,      // Adding 0 to satisfy potential schema requirements
+        shippingPrice: 0, 
+        taxPrice: 0,      
         totalPrice: totalPrice,
       };
 
-      // 2. Use the full Render URL to avoid proxy 500 errors
-      const { data } = await axios.post('https://mg-tech-ecommercestore.onrender.com/api/orders', orderData, config);
+      // Changed back to relative paths to utilize your package.json proxy correctly
+      const { data } = await axios.post('/api/orders', orderData, config);
 
-      // Clear cart
+      // Clear cart locally and on the server
       setCartItems([]);
-      await axios.put('https://mg-tech-ecommercestore.onrender.com/api/users/cart', { cartItems: [] }, config);
+      await axios.put('/api/users/cart', { cartItems: [] }, config);
       
       navigate(`/order/${data._id}`);
     } catch (err) {
       console.error("Order Error:", err.response ? err.response.data : err);
       alert(err.response?.data?.message || "Failed to place order. Check console.");
+    } finally {
+      setIsLoading(false); // Stop loading regardless of success or failure
     }
   };
+
   return (
     <div className="container" style={{ marginTop: '40px', paddingBottom: '100px' }}>
       <h1 style={{ marginBottom: '30px' }}>Final Review</h1>
@@ -67,7 +75,6 @@ const PlaceOrderScreen = () => {
         
         {/* LEFT SIDE: SUMMARY DETAILS */}
         <div style={{ flex: 2 }}>
-          {/* Shipping Section */}
           <div className="product-card" style={{ padding: '25px', marginBottom: '20px' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', color: 'var(--primary)' }}>
               <MapPin size={20} color="var(--accent)" /> Shipping Details
@@ -79,7 +86,6 @@ const PlaceOrderScreen = () => {
             </p>
           </div>
 
-          {/* Payment Section */}
           <div className="product-card" style={{ padding: '25px', marginBottom: '20px' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', color: 'var(--primary)' }}>
               <CreditCard size={20} color="var(--accent)" /> Payment Method
@@ -89,7 +95,6 @@ const PlaceOrderScreen = () => {
             </div>
           </div>
 
-          {/* Items Section */}
           <div className="product-card" style={{ padding: '25px' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', color: 'var(--primary)' }}>
               <ShoppingBag size={20} color="var(--accent)" /> Order Items
@@ -138,12 +143,22 @@ const PlaceOrderScreen = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px'
+                gap: '10px',
+                opacity: (cartItems.length === 0 || isLoading) ? 0.7 : 1, // Visual feedback for disabled
+                cursor: (cartItems.length === 0 || isLoading) ? 'not-allowed' : 'pointer'
               }}
               onClick={placeOrderHandler}
-              disabled={cartItems.length === 0}
+              disabled={cartItems.length === 0 || isLoading} // Button disabled when loading
             >
-              Confirm Order <ArrowRight size={20} />
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} /> Processing...
+                </>
+              ) : (
+                <>
+                  Confirm Order <ArrowRight size={20} />
+                </>
+              )}
             </button>
             <p style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', marginTop: '15px' }}>
                 By placing your order, you agree to our terms of service.
