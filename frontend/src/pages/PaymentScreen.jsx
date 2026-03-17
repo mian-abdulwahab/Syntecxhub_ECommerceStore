@@ -5,28 +5,23 @@ import { CreditCard, Banknote, ArrowLeft } from 'lucide-react'; // Added ArrowLe
 
 const PaymentScreen = () => {
   const { cart, savePaymentMethod } = useContext(CartContext);
-  const [paymentMethod, setPaymentMethod] = useState('PayPal');
+  
+  // FIX: Initialize state directly from context/localStorage. 
+  // This removes the need for the useEffect that was resetting your choice.
+  const [paymentMethod, setPaymentMethod] = useState(cart?.paymentMethod || 'PayPal');
   const navigate = useNavigate();
 
-  // Safety Check: Pull shipping address to verify user didn't skip a step
   const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress'));
 
   useEffect(() => {
-    // 1. If no shipping address, they shouldn't be here
     if (!shippingAddress || !shippingAddress.address) {
       navigate('/shipping');
-      return;
     }
-
-    // 2. Load existing selection from context/localStorage
-    if (cart?.paymentMethod) {
-      setPaymentMethod(cart.paymentMethod);
-    }
-  }, [cart, navigate, shippingAddress]);
+    // We REMOVED the logic that sets paymentMethod here.
+  }, [navigate, shippingAddress]);
 
   const submitHandler = (e) => {
     e.preventDefault();
-    // Save selection and move forward
     savePaymentMethod(paymentMethod); 
     navigate('/placeorder');
   };

@@ -12,13 +12,12 @@ const AdminProductList = () => {
   
   const navigate = useNavigate();
   
-  // Safety Check: Get userInfo
+  // Memoize or parse userInfo inside the component
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // Relative path works with Local Proxy and Render Domain
       const { data } = await axios.get('/api/products'); 
       setProducts(data);
     } catch (err) {
@@ -29,13 +28,19 @@ const AdminProductList = () => {
   };
 
   useEffect(() => {
-    // 1. Redirection if user is not an Admin
+    // 1. Security Check: Redirection if user is not an Admin
     if (!userInfo || !userInfo.isAdmin) {
       navigate('/login');
       return;
     }
+
+    // 2. THE FIX: Fetch products only once on mount. 
+    // We remove [userInfo] from dependencies because JSON.parse 
+    // creates a "new" object on every render, causing the infinite loop.
     fetchProducts(); 
-  }, [navigate, userInfo]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const triggerToast = (msg) => {
     setToastMsg(msg);
@@ -49,7 +54,7 @@ const AdminProductList = () => {
           headers: { Authorization: `Bearer ${userInfo.token}` }
         });
         triggerToast("Product deleted successfully");
-        fetchProducts(); // Refresh list after delete
+        fetchProducts(); 
       } catch (err) {
         triggerToast(err.response?.data?.message || "Delete failed");
       }
@@ -74,7 +79,6 @@ const AdminProductList = () => {
     }
   };
 
-  // If no user/admin, don't render anything to prevent UI flickering
   if (!userInfo || !userInfo.isAdmin) return null;
 
   return (
@@ -119,16 +123,12 @@ const AdminProductList = () => {
                   <td style={{ padding: '15px', color: '#1e293b' }}>${product.price.toLocaleString()}</td>
                   <td style={{ padding: '15px', color: '#64748b' }}>{product.category}</td>
                   <td style={{ padding: '15px', display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <Link 
-                      to={`/admin/product/${product._id}/edit`} 
-                      style={{ color: '#6366f1', title: 'Edit Product' }}
-                    >
+                    <Link to={`/admin/product/${product._id}/edit`} style={{ color: '#6366f1' }}>
                       <Edit size={18} />
                     </Link>
                     <button 
                       onClick={() => deleteHandler(product._id)} 
                       style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}
-                      title="Delete Product"
                     >
                       <Trash2 size={18} />
                     </button>
