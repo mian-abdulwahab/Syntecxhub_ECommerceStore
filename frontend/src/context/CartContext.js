@@ -4,10 +4,11 @@ import axios from 'axios';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  // 1. Initialize cartItems from userInfo
+  // 1. Initialize cartItems from userInfo or direct localStorage
   const [cartItems, setCartItems] = useState(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    return userInfo && userInfo.cartItems ? userInfo.cartItems : [];
+    // Fallback chain: userInfo.cartItems -> direct cartItems -> empty array
+    return userInfo?.cartItems || JSON.parse(localStorage.getItem('cartItems')) || [];
   });
 
   // 2. Initialize cart object for Shipping & Payment details
@@ -20,36 +21,31 @@ export const CartProvider = ({ children }) => {
       : 'PayPal',
   });
 
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-
+  // Sync cartItems to localStorage whenever they change
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('userInfo'));
-    if (storedUser && storedUser.cartItems) {
-      setCartItems(storedUser.cartItems);
-    } else {
-      setCartItems([]);
-    }
-  }, []);
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems]);
 
-  // Function to save Payment Method globally
   const savePaymentMethod = (method) => {
     setCart((prev) => ({ ...prev, paymentMethod: method }));
     localStorage.setItem('paymentMethod', JSON.stringify(method));
   };
 
-  // Function to save Shipping Address globally
   const saveShippingAddress = (addressData) => {
     setCart((prev) => ({ ...prev, shippingAddress: addressData }));
     localStorage.setItem('shippingAddress', JSON.stringify(addressData));
   };
 
   const addToCart = async (product) => {
-    const existItem = cartItems.find((x) => x.product === (product._id || product.product));
+    // Determine the correct ID to use for comparison
+    const productId = product._id || product.product;
+    const existItem = cartItems.find((x) => (x.product || x._id) === productId);
+    
     let newCart;
 
     if (existItem) {
       newCart = cartItems.map((x) =>
-        x.product === (product._id || product.product) 
+        (x.product || x._id) === productId
           ? { ...x, qty: x.qty + 1 } 
           : x
       );
@@ -57,7 +53,7 @@ export const CartProvider = ({ children }) => {
       newCart = [
         ...cartItems,
         {
-          product: product._id,
+          product: productId,
           name: product.name,
           image: product.image,
           price: product.price,
@@ -68,7 +64,10 @@ export const CartProvider = ({ children }) => {
 
     setCartItems(newCart);
 
-    if (userInfo) {
+    // Get fresh userInfo inside the function to avoid stale closures
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+    if (userInfo && userInfo.token) {
       try {
         const config = {
           headers: {
@@ -76,7 +75,7 @@ export const CartProvider = ({ children }) => {
             Authorization: `Bearer ${userInfo.token}`,
           },
         };
-        // Using Proxy URL
+        // Using Relative Path for Production
         await axios.put('/api/users/cart', { cartItems: newCart }, config);
         
         const updatedUserInfo = { ...userInfo, cartItems: newCart };

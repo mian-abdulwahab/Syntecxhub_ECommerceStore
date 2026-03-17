@@ -15,7 +15,9 @@ const RegisterScreen = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
+      // FIX 1: Removed 'http://localhost:5000'. 
+      // This allows the browser to use the proxy (local) or the current domain (Render).
+      const { data } = await axios.post('/api/users', { name, email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
       setToastMsg('Account created! Welcome, ' + name);
@@ -27,25 +29,27 @@ const RegisterScreen = () => {
       }, 2000);
 
     } catch (err) {
-      const errorResponse = err.response && err.response.data.message 
+      // FIX 2: Added Optional Chaining (?.) to prevent "Cannot read properties of undefined"
+      // If the network fails, err.response is undefined. This check prevents a crash.
+      const errorResponse = err.response?.data?.message 
         ? err.response.data.message 
-        : err.message;
+        : "Network Error: Cannot connect to server";
 
       setToastMsg(errorResponse);
       setShowToast(true);
-      console.log("Full Error:", err.response.data);
+      
+      // Safety log
+      console.log("Error details:", err.response?.data || err.message);
     }
   };
 
   return (
-    /* Removed container class and marginTop. 
-       Used flex: 1 and alignItems: center for perfect vertical centering. */
     <div style={{ 
       flex: 1, 
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
-      padding: '20px' // Added padding for mobile safety
+      padding: '20px' 
     }}>
       <form 
         onSubmit={submitHandler} 
@@ -53,8 +57,8 @@ const RegisterScreen = () => {
         style={{ 
           padding: '40px', 
           width: '400px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.05)', // Professional soft shadow
-          margin: '0' // Ensure no hidden margins trigger scrolling
+          boxShadow: '0 10px 25px rgba(0,0,0,0.05)', 
+          margin: '0' 
         }}
         autoComplete="off"
       >

@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
-import { Trash2, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
 import axios from 'axios';
+import { Trash2, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
 
 const CartScreen = () => {
   const { cartItems, setCartItems } = useContext(CartContext);
@@ -17,8 +17,9 @@ const CartScreen = () => {
     const newCart = cartItems.filter((x) => (x.product || x._id) !== id);
     setCartItems(newCart);
 
+    // Safety Check: Only sync if userInfo exists
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if (userInfo) {
+    if (userInfo && userInfo.token) {
       const updatedUser = { ...userInfo, cartItems: newCart };
       localStorage.setItem('userInfo', JSON.stringify(updatedUser));
 
@@ -29,6 +30,7 @@ const CartScreen = () => {
             Authorization: `Bearer ${userInfo.token}`,
           },
         };
+        // Using relative path for production readiness
         await axios.put('/api/users/cart', { cartItems: newCart }, config);
       } catch (err) {
         console.error("Database sync failed on removal", err);
@@ -40,18 +42,19 @@ const CartScreen = () => {
   const checkoutHandler = () => {
     const userInfo = localStorage.getItem('userInfo');
     if (!userInfo) {
+      // Professional redirect that remembers where the user wanted to go
       navigate('/login?redirect=shipping');
     } else {
       navigate('/shipping');
     }
   };
 
-  // EMPTY STATE (Updated Button Styling)
+  // EMPTY STATE
   if (cartItems.length === 0) {
     return (
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 70px)' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 70px)', padding: '20px' }}>
         <ShoppingBag size={80} color="#cbd5e1" style={{ marginBottom: '20px' }} />
-        <h2 style={{ color: '#1e293b', marginBottom: '10px' }}>Your tech bag is empty</h2>
+        <h2 style={{ color: '#1e293b', marginBottom: '10px', textAlign: 'center' }}>Your tech bag is empty</h2>
         
         <Link 
           to="/" 
@@ -62,8 +65,9 @@ const CartScreen = () => {
             alignItems: 'center', 
             gap: '8px', 
             textDecoration: 'none',
-            width: 'fit-content', // This prevents the button from stretching
-            padding: '12px 30px'  // Custom padding for a better size
+            width: 'fit-content',
+            padding: '12px 30px',
+            border: 'none'
           }}
         >
           <ArrowLeft size={18} /> Continue Shopping
@@ -73,17 +77,17 @@ const CartScreen = () => {
   }
 
   return (
-    <div className="container" style={{ marginTop: '40px', paddingBottom: '40px' }}>
-      <h1 style={{ marginBottom: '30px' }}>Shopping Cart ({totalItems})</h1>
+    <div className="container" style={{ marginTop: '40px', paddingBottom: '60px' }}>
+      <h1 style={{ marginBottom: '30px', color: 'var(--primary)' }}>Shopping Cart ({totalItems})</h1>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
         {/* ITEM LIST */}
         <div style={{ flex: 2 }}>
           {cartItems.map(item => (
-            <div key={item.product || item._id} className="product-card" style={{ display: 'flex', padding: '20px', marginBottom: '20px', alignItems: 'center', gap: '20px' }}>
+            <div key={item.product || item._id} className="product-card" style={{ display: 'flex', padding: '20px', marginBottom: '20px', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
               <img src={item.image} alt={item.name} style={{ width: '120px', height: '100px', borderRadius: '12px', objectFit: 'cover' }} />
               
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: '150px' }}>
                 <Link to={`/product/${item.product || item._id}`} style={{ textDecoration: 'none', color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.1rem' }}>
                   {item.name}
                 </Link>
@@ -133,7 +137,8 @@ const CartScreen = () => {
                 justifyContent: 'center', 
                 gap: '10px',
                 border: 'none',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                cursor: 'pointer'
               }}
             >
               <CreditCard size={20} /> Proceed to Checkout

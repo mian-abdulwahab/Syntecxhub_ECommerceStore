@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ShoppingBag, Check, X, Eye, Package } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
 
 const ProfileScreen = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const navigate = useNavigate();
+
+  // Safety Check: Parse userInfo only if it exists
+  const userInfo = JSON.parse(localStorage.getItem('userInfo')) || null;
 
   useEffect(() => {
+    // If no user, redirect to login
+    if (!userInfo) {
+      navigate('/login');
+      return;
+    }
+
     const fetchMyOrders = async () => {
       try {
         const config = {
@@ -19,12 +28,21 @@ const ProfileScreen = () => {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching user orders", err);
+        // Optional: If token is expired (401), logout the user
+        if (err.response && err.response.status === 401) {
+           localStorage.removeItem('userInfo');
+           navigate('/login');
+        }
         setLoading(false);
       }
     };
 
     fetchMyOrders();
-  }, [userInfo.token]);
+    // We only want this to run once or when the token changes
+  }, [navigate, userInfo?.token]); 
+
+  // If no userInfo, don't render the details (prevents charAt(0) error)
+  if (!userInfo) return null;
 
   return (
     <div className="container" style={{ marginTop: '40px', paddingBottom: '60px' }}>
@@ -34,7 +52,7 @@ const ProfileScreen = () => {
         <div className="product-card" style={{ padding: '30px', height: 'fit-content' }}>
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <div style={{ width: '80px', height: '80px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', color: 'white', fontSize: '2rem', fontWeight: 'bold' }}>
-              {userInfo.name.charAt(0)}
+              {userInfo.name ? userInfo.name.charAt(0) : 'U'}
             </div>
             <h2 style={{ margin: 0 }}>{userInfo.name}</h2>
             <p style={{ color: '#64748b' }}>{userInfo.email}</p>
@@ -76,7 +94,7 @@ const ProfileScreen = () => {
                   {orders.map((order) => (
                     <tr key={order._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '15px', fontSize: '0.8rem', color: '#94a3b8' }}>{order._id.substring(0, 10)}</td>
-                      <td style={{ padding: '15px' }}>{order.createdAt.substring(0, 10)}</td>
+                      <td style={{ padding: '15px' }}>{order.createdAt ? order.createdAt.substring(0, 10) : 'N/A'}</td>
                       <td style={{ padding: '15px', fontWeight: '600' }}>${order.totalPrice.toFixed(2)}</td>
                       <td style={{ padding: '15px' }}>
                         {order.isPaid ? <Check size={18} color="#10b981" /> : <X size={18} color="#ef4444" />}

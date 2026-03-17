@@ -14,7 +14,7 @@ const LoginScreen = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Using clean URL thanks to the proxy in package.json
+      // Clean relative URL works with proxy (Local) and base domain (Render)
       const { data } = await axios.post('/api/users/login', { email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
@@ -23,20 +23,24 @@ const LoginScreen = () => {
       setShowToast(true);
 
       setTimeout(() => {
-        // PROFESSIONAL REDIRECT LOGIC
         if (data.isAdmin) {
-          navigate('/admin/productlist'); // Admin goes to Dashboard
+          navigate('/admin/productlist'); 
         } else {
-          navigate('/'); // Customer goes to Home
+          navigate('/'); 
         }
         window.location.reload(); 
       }, 1500);
 
     } catch (err) {
-      setToastMsg(err.response && err.response.data.message 
+      // FIX: Added Optional Chaining (?.) to prevent crashes on Network Errors
+      const errorMessage = err.response?.data?.message 
         ? err.response.data.message 
-        : 'Invalid Email or Password');
+        : 'Connection failed. Please check your internet or server.';
+        
+      setToastMsg(errorMessage);
       setShowToast(true);
+      
+      console.error("Login Error:", err.response?.data || err.message);
     }
   };
 
@@ -47,7 +51,7 @@ const LoginScreen = () => {
       justifyContent: 'center', 
       alignItems: 'center',
       padding: '20px',
-      minHeight: 'calc(100vh - 70px)' // Ensures centering works on all screens
+      minHeight: 'calc(100vh - 70px)' 
     }}>
       <form 
         onSubmit={submitHandler} 

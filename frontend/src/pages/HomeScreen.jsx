@@ -1,32 +1,36 @@
-import React, { useState, useEffect, useContext } from "react"; // Added useContext
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import ProductCard from "../components/ProductCard";
 import Toast from "../components/Toast";
-import { CartContext } from "../context/CartContext"; // Import your CartContext
+import { CartContext } from "../context/CartContext";
+import { Loader2 } from "lucide-react"; // Added for loading state
 
 const HomeScreen = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // Added loading state
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
-  // Get addToCart function from Context
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/products");
+        setLoading(true);
+        // FIX: Removed http://localhost:5000 to work with proxy/production
+        const { data } = await axios.get("/api/products");
         setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
   }, []);
 
-  // Function to handle both the logic and the visual feedback
   const handleAddToCart = (product) => {
-    addToCart(product); // Adds to global state (updates Navbar counter)
+    addToCart(product);
     setToastMsg(`${product.name} added to cart!`);
     setShowToast(true);
   };
@@ -42,6 +46,7 @@ const HomeScreen = () => {
           borderRadius: "20px",
           marginTop: "30px",
           textAlign: "center",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
         }}
       >
         <h1 style={{ fontSize: "3rem", marginBottom: "10px" }}>
@@ -59,30 +64,41 @@ const HomeScreen = () => {
             display: "flex",
             alignItems: "center",
             gap: "10px",
+            color: "var(--primary)",
           }}
         >
           Latest Gadgets
         </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "30px",
-            marginBottom: "50px",
-          }}
-        >
-          {products.map((product) => (
-            /* Pass the handleAddToCart function as a prop to the card */
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              onAddToCart={() => handleAddToCart(product)} 
-            />
-          ))}
-        </div>
+
+        {/* Loading Spinner */}
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
+            <Loader2 className="animate-spin" size={40} color="var(--accent)" />
+          </div>
+        ) : products.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "50px", color: "#64748b" }}>
+            <h3>No products found.</h3>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "30px",
+              marginBottom: "50px",
+            }}
+          >
+            {products.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={product}
+                onAddToCart={() => handleAddToCart(product)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Toast Notification Component */}
       {showToast && (
         <Toast message={toastMsg} onClose={() => setShowToast(false)} />
       )}
